@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Slide;
+use Session;
+use App\Http\Requests\SlideRequest;
+use Carbon\Carbon;
+use DB;
 class SlideController extends Controller
 {
     /**
@@ -11,9 +15,13 @@ class SlideController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('admin.slide.index');
+       
+        $slides= DB::table('slides')->paginate(4);
+        $slides = Slide::all();
+        //dd($slides);
+        return view('admin.slide.index',compact('slides'));
     }
 
     /**
@@ -32,9 +40,26 @@ class SlideController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SlideRequest $request)
     {
-        //
+      
+      if($request->hasFile('url_img')){
+        $url_img=$request->url_img->getClientOriginalName();
+        $request->url_img->move('images', $url_img);
+        $slide = new Slide;
+        $slide->link = $request->link;;
+        $slide->display_order = $request->display_order;
+        $slide->url_img = $url_img;
+        $slide->updated_at = null;
+        $slide->isdelete = false;
+        $slide->isdisplay = false;
+        $slide->save();
+            if ($slide){
+                 return redirect('/admin/slide')->with('message','Create Newsuccessfully!');
+            }else{
+               return back()->with('err','Save error!');
+            }
+        }
     }
 
     /**
@@ -45,7 +70,9 @@ class SlideController extends Controller
      */
     public function show($id)
     {
-        return view('admin.slide.detail');
+        $slide = Slide::findOrFail($id);
+        return view('admin.slide.detail',compact('slide'));
+        
     }
 
     /**
@@ -56,7 +83,8 @@ class SlideController extends Controller
      */
     public function edit($id)
     {
-        return view('admin.slide.edit');
+        $slide = Slide::findOrFail($id);
+        return view('admin.slide.edit',compact('slide'));
     }
 
     /**
@@ -66,9 +94,23 @@ class SlideController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(SlideRequest $request, $id)
+     {
+        $slide = Slide::findOrFail($id);
+        if (isset($slide))
+        {
+        $slide->link = $request->link;
+        $slide->url_img = $request->url_img;
+        $slide->display_order = $request->display_order;
+        $slide->updated_at = Carbon::now()->toDateTimeString();
+        $slide->isdelete = false;
+        $slide->isdisplay = false;
+        $slide->update();
+        }else{
+            return back()->with('err','Save error!');
+        }
+        return redirect('admin/slide
+            ')->with('message','Edit successfully!'); 
     }
 
     /**
@@ -79,6 +121,10 @@ class SlideController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $slides = Slide::findOrFail($id);
+        if ($slides){
+            $slides->delete();
+        }
+        return redirect("admin/slide")->with('message','Delete successfully!');
     }
 }

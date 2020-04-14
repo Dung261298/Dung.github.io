@@ -13,13 +13,15 @@ class CreateSlidesTable extends Migration
      */
     public function up()
     {
-        Schema::create('sides', function (Blueprint $table) {
+        Schema::create('slides', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('link');
             $table->string('url_img');
             $table->integer('display_order');
-            $table->string('created_by');
-            $table->string('updated_by');
+            $table->boolean('isdelete');
+            $table->boolean('isdisplay');
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
             $table->timestamps();
         });
     }

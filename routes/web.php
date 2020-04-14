@@ -26,6 +26,8 @@ Route::resource('admin/order','OrderController');
 Route::resource('admin/orderdetail','OrderDetailController');
 Route::resource('admin/product','ProductController');
 Route::resource('admin/slide','SlideController');
+
+Route::get('/setvalue', 'ProductController@setvalue');
 // END ADMIN
 
 // --------------------------------------------
